@@ -1,9 +1,7 @@
 # p2_rm
-Archivos de la 2ª práctica de la asignatura "Robots Móviles", del 4º año del grado de Ingeniería Robótica (Universidad de Alicante).
-
-# Autores
-NOVELO TÉLLEZ, Yoinel
-TORRES CÁMARA, José Miguel
+Este repositorio contiene los archivos de la 2ª práctica de la asignatura "Robots Móviles", del 4º año del grado de Ingeniería Robótica (Universidad de Alicante). Todo este contenido ha sido desarrollado por:
+* NOVELO TÉLLEZ, Yoinel
+* TORRES CÁMARA, José Miguel
 
 # Descripción de la aplicación
 Implementremos una sistema robótico de logística interna. Se le pedirá un objeto definido por dos variables (pequeño/mediano/grande y rojo/verde/azul). El robot entrará al almacén, irá a donde se almacenen los del tamaño pedido y, mediante un escaneo basado en visión artificial, cogerá el del color solicitado.
