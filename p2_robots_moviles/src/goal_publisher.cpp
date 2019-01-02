@@ -18,17 +18,17 @@ void selectionCallback(const std_msgs::Int32::ConstPtr& msg)
   else
   {
     std::cout << "[!] ERROR! Se ha introducido un identificador de pose ilegal. Opciones:" << std::endl;
-    std::cout << "  '1': Salir del almacen" << std::endl;
-    std::cout << "  '2': Ir a por objetos S" << std::endl;
-    std::cout << "  '1': Ir a por objetos M" << std::endl;
-    std::cout << "  '1': Ir a por objetos L" << std::endl;
+    std::cout << "  '0': Salir del almacen" << std::endl;
+    std::cout << "  '1': Ir a por objetos S" << std::endl;
+    std::cout << "  '2': Ir a por objetos M" << std::endl;
+    std::cout << "  '3': Ir a por objetos L" << std::endl;
 
   }
 }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "ubiReader");
+  ros::init(argc, argv, "goal_publisher");
 
   //Suscriptor a topic para seleccionar goal
   ros::NodeHandle nh;
@@ -96,10 +96,6 @@ int main(int argc, char** argv)
         ROS_INFO("[*] Exito! Goal alcanzado");
       else
         ROS_INFO("[!] ERROR! No ha sido posible alcanzar el goal");
-      
-
-      //Configurar la pose "home" (salir del almacen) como siguiente destino
-      selection = 0;
 
       ros::spinOnce();
   }

@@ -2,12 +2,9 @@
 #include <image_transport/image_transport.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
-#include <std_msgs/Float64.h>
+#include <std_msgs/Float64MultiArray.h>
 
-
-std_msgs::Float64 red_area;
-std_msgs::Float64 green_area;
-std_msgs::Float64 blue_area;
+std_msgs::Float64MultiArray areas;
 
 double getArea(cv::Mat img)
 {
@@ -42,8 +39,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
 	try
 	{
-		std::cout << "Image size: " << msg->height << "x" << msg->width << std::endl;
-
 		cv::Mat img_bgr, img_hsv; //Variables to store images in different color spaces
 		cv::Mat red1, red2, green, blue;
 		img_bgr = cv_bridge::toCvShare(msg, "bgr8")->image; //Store original image (in BGR)
@@ -55,17 +50,17 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 		cv::inRange(img_hsv, cv::Scalar(155, 128, 102), cv::Scalar(180, 255, 255), red2);
 		red1 = red1+red2; //Add the two pictures
 		cv::imshow("red", red1); //Show red colors
-		red_area.data = getArea(red1);
+		areas.data[0] = getArea(red1);
 
 		//Threshold green colors
 		cv::inRange(img_hsv, cv::Scalar(35, 128, 102), cv::Scalar(75, 255, 255), green);
 		cv::imshow("green", green); //Show green colors
-		green_area.data = getArea(green);
+		areas.data[1] = getArea(green);
 
 		//Threshold blue colors
 		cv::inRange(img_hsv, cv::Scalar(80, 128, 102), cv::Scalar(130, 255, 255), blue);
 		cv::imshow("blue", blue); //Show blue colors
-		blue_area.data = getArea(blue);
+		areas.data[2] = getArea(blue);
 
 		cv::waitKey(30);
 	}
@@ -78,9 +73,9 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 int main(int argc, char **argv)
 {
   //Initialize global variables
-    red_area.data = 0.0;
-    green_area.data = 0.0;
-    blue_area.data = 0.0;
+    areas.data.push_back(0.0);
+    areas.data.push_back(0.0);
+    areas.data.push_back(0.0);
 
   //Initialize OpenCV windows
     cv::namedWindow("view"); cv::namedWindow("red"); cv::namedWindow("green"); cv::namedWindow("blue");
@@ -97,23 +92,16 @@ int main(int argc, char **argv)
     //image_transport::Subscriber sub = it.subscribe("/camera/rgb/image_raw", 1, imageCallback); //Camera topic subscriber (pc) (RGB astra)
 
     //Areas publishers
-      ros::Publisher red_pub = nh.advertise<std_msgs::Float64>("/areas/red_area", 1);
-      ros::Publisher green_pub = nh.advertise<std_msgs::Float64>("/areas/green_area", 1);
-      ros::Publisher blue_pub = nh.advertise<std_msgs::Float64>("/areas/blue_area", 1);
+      ros::Publisher areas_publisher = nh.advertise<std_msgs::Float64MultiArray>("/rgb_areas", 1);
 
   //Publish areas
   ros::Rate loop_rate(5);
 
   while (ros::ok())
   {
-   
-    //Publish areas
-      red_pub.publish(red_area);
-      green_pub.publish(green_area);
-      blue_pub.publish(blue_area);
+	areas_publisher.publish(areas); //Publish areas
 
     ros::spinOnce();
-
     loop_rate.sleep();
   }
 
