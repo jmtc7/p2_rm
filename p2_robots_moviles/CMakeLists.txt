@@ -53,9 +53,9 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 # add_message_files(
+#   DIRECTORY msg
 #   FILES
-#   Message1.msg
-#   Message2.msg
+#   rgbAreas.msg
 # )
 
 ## Generate services in the 'srv' folder
@@ -75,7 +75,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   move_base_msgs#   std_msgs
+#   std_msgs
 # )
 
 ################################################
@@ -112,6 +112,7 @@ catkin_package(
 #  LIBRARIES p2_robots_moviles
 #  CATKIN_DEPENDS actionlib move_base_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
+#CATKIN_DEPENDS std_msgs
 )
 
 ###########
@@ -211,5 +212,9 @@ target_link_libraries(goal_publisher ${catkin_LIBRARIES})
 #Publicador de areas
 add_executable(area_publisher src/area_publisher.cpp)
 target_link_libraries(area_publisher ${OpenCV_LIBS} ${catkin_LIBRARIES})
-add_dependencies(area_publisher area_publisher)
+
+#Proceso principal
+add_executable(main_process src/main_process.cpp)
+target_link_libraries(main_process ${catkin_LIBRARIES})
+
 
