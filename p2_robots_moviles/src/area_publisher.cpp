@@ -1,39 +1,31 @@
-#include <ros/ros.h>
-#include <image_transport/image_transport.h>
-#include <opencv2/highgui/highgui.hpp>
-#include <cv_bridge/cv_bridge.h>
-#include <std_msgs/Float64MultiArray.h>
+/*
+***************************
+***************************
+*******  S E T U P  *******
+***************************
+***************************
+*/
+
+//Include dependencies
+	#include <ros/ros.h>
+	#include <image_transport/image_transport.h>
+	#include <opencv2/highgui/highgui.hpp>
+	#include <cv_bridge/cv_bridge.h>
+	#include <std_msgs/Float64MultiArray.h>
+
+	double getArea(cv::Mat img);
+
+
+
+/*
+***************************
+***************************
+**** C A L L B A C K S ****
+***************************
+***************************
+*/
 
 std_msgs::Float64MultiArray areas;
-
-double getArea(cv::Mat img)
-{
-	//Get contours
-		std::vector<std::vector<cv::Point> > contours;
-		cv::findContours(img, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
-
-	//Get the biggest contour
-		int maxContour = 0; //Store the biggest contour's index
-		float maxArea = 0;
-		float auxArea = 0;
-
-		if(contours.size() >= 1)
-		{
-			for(int i=0; i<(contours.size()-1); i++)
-			{
-				auxArea=cv::contourArea(contours[i]);
-				
-				if(maxArea < auxArea)
-				{
-					maxArea = auxArea;
-				}
-			}
-		}
-
-	//Get area    
-		return maxArea;
-}
-
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -69,6 +61,16 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 		ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
 	}
 }
+
+
+
+/*
+***************************
+***************************
+***** M A I N   F N C *****
+***************************
+***************************
+*/
 
 int main(int argc, char **argv)
 {
@@ -106,4 +108,42 @@ int main(int argc, char **argv)
   }
 
   cv::destroyWindow("view"); cv::destroyWindow("red"); cv::destroyWindow("green"); cv::destroyWindow("blue");
+}
+
+
+
+/*
+***************************
+***************************
+***** A U X.  F N C S *****
+***************************
+***************************
+*/
+
+double getArea(cv::Mat img)
+{
+	//Get contours
+		std::vector<std::vector<cv::Point> > contours;
+		cv::findContours(img, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
+
+	//Get the biggest contour
+		int maxContour = 0; //Store the biggest contour's index
+		float maxArea = 0;
+		float auxArea = 0;
+
+		if(contours.size() >= 1)
+		{
+			for(int i=0; i<(contours.size()-1); i++)
+			{
+				auxArea=cv::contourArea(contours[i]);
+				
+				if(maxArea < auxArea)
+				{
+					maxArea = auxArea;
+				}
+			}
+		}
+
+	//Get area    
+		return maxArea;
 }

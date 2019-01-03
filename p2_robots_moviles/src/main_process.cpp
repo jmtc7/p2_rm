@@ -1,33 +1,58 @@
+/*
+***************************
+***************************
+*******  S E T U P  *******
+***************************
+***************************
+*/
+
 #include <ros/ros.h>
 #include <std_msgs/Int32.h>
 #include <stdlib>
 #include <std_msgs/Float64MultiArray.h>
-
-
-bool error; //Variable to flag when an error occures
-std::vector<float> areas;
+#include <std_msgs/Bool.h>
 
 std::vector<int> analyzePetition(std::string petition);
 
-void areaCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
+
+
+/*
+***************************
+***************************
+**** C A L L B A C K S ****
+***************************
+***************************
+*/
+
+bool error; //Variable to flag when an error occures
+bool goal_reached; //Variable to flag if the turtlebot has or hasnt arrived to the goal
+
+void goalReachedCallback(const std_msgs::Bool::ConstPtr& msg)
 {
-    areas = msg.data;
+    goal_reached = msg->data;
 
     return;
 }
 
+
+
+/*
+***************************
+***************************
+***** M A I N   F N C *****
+***************************
+***************************
+*/
+
 int main(int argc, char** argv)
 {
   //ROS setup
-    ros::init(argc, argv, "goal_publisher");
+    ros::init(argc, argv, "main_process");
     ros::NodeHandle nh;
 
-    //Publisher to set a goal for the robot
-    ros::Publisher size_publisher = nh.advertise<std_msgs::Float64>("/actionSelect", 1);
-
-    //Subscriber to the color areas
-    ros::Subscriber area_subscriber = nh.subscribe("/areas", 1, areaCallback);
-
+    //Publishers and subscribers
+      ros::Publisher desiredAction_publisher = nh.advertise<std_msgs::Int32>("/desiredAction", 1); //Publisher to set a goal for the robot
+      ros::Publisher color_publisher = nh.advertise<std_msgs::Int32>("/desiredColor", 1); //Publisher to set a goal for the robot
 
   //Get order
     std::string petition; //Store the command
@@ -43,50 +68,39 @@ int main(int argc, char** argv)
     color = analysys_result[1]; //Extract the desired color
 
   //Select goal (Small, medium or large tables)
-    size_publisher.publish(size);
+    desiredAction_publisher.publish(size);
 
   //Wait for the robot to arrive
     //TODO!!!! Como esperar a que llegue al objetivo (llegar a entre las cajas)
 
   //Turn around searching the desired color box
-    float theta, theta_maxArea; //Robot orientation and orientation in which the maximum area was perceived
-    float max_area; //Maximum perceived area so far
-
-    for (theta=0; theta<3.14159265359; theta+=0.02) //Turn in sections of 0.02 rad (1º aprox.)
-    {
-        //Move the robot to the new orientation
-            //TODO
-
-        //Check if the actual area is bigger than the maximum perceived so far
-        if (max_area < areas[color])
-        {
-            max_area = areas[color];
-            theta_maxArea = theta; //Store actual orientation
-        }
-    }
-
-    if (max_area == 0)
-    {
-        error = 1;
-        std::cout << "[!] ERROR: No se ha detectado el color buscado"
-    }
+    color_publisher.publish(color); //Publish the desired color
+    desiredAction_publisher.publish(7); //Scan environment and pick object
 
   //Wait 1 sec (simulate that the robot is picking the object)
 
   //Select goal (window 1 (S), window 2 (M) or window 3 (L))
-    size_publisher.publish(size+3);
+    desiredAction_publisher.publish(0); //size+3
 
   //Wait for the robot to arrive and 1 sec (simulate that the robot is giving the object)
     //TODO!!!! Como esperar a que llegue al objetivo (llegar a entre las cajas)
 
   //Leave the warehouse
-size_publisher.publish(size+3);
+desiredAction_publisher.publish(size+3);
 
 
   return 0;
 }
 
 
+
+/*
+***************************
+***************************
+***** A U X.  F N C S *****
+***************************
+***************************
+*/
 
 std::vector<int> analyzePetition(std::string petition)
 {
@@ -109,11 +123,11 @@ std::vector<int> analyzePetition(std::string petition)
 
     //Find the desired colour
     if (petition.find("roja"))
-        ret[1] = 1;
+        ret[1] = 0;
     else if (petition.find("verde"))
-        ret[1] = 2;
+        ret[1] = 1;
     else if (petition.find("azul"))
-        ret[1] = 3;
+        ret[1] = 2;
     else
     {
         error = true;
