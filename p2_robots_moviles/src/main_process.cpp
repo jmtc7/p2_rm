@@ -8,12 +8,10 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Int32.h>
-#include <stdlib>
-#include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/Bool.h>
 
 std::vector<int> analyzePetition(std::string petition);
-
+void waitUntil_GoalReached(); //Function that blocks the program until the setted goal is reached
 
 
 /*
@@ -53,41 +51,48 @@ int main(int argc, char** argv)
     //Publishers and subscribers
       ros::Publisher desiredAction_publisher = nh.advertise<std_msgs::Int32>("/desiredAction", 1); //Publisher to set a goal for the robot
       ros::Publisher color_publisher = nh.advertise<std_msgs::Int32>("/desiredColor", 1); //Publisher to set a goal for the robot
+      ros::Subscriber goalReached_subscriber = nh.subscribe("/goal_reached", 1, goalReachedCallback); //Goal reaching subscriber
 
   //Get order
     std::string petition; //Store the command
-    int size, color; //Store the asked size and color
+    std_msgs::Int32 size, color; //Store the asked size and color
     std::vector<int> analysys_result; //Store the result of the analysys
 
-    std::cout << "¿Qué objeto desea? (Caja [Pequeña/mediana/grande] [roja/verde/azul]):"
-    std::cin >> petition;
+    std::cout << "¿Qué objeto desea? (Caja [Pequeña/mediana/grande] [roja/verde/azul]):" << std::endl;
+    std::getline(std::cin, petition); //Store the input in "petition"
 
     //Analyze petition
     analysys_result = analyzePetition(petition);
-    size = analysys_result[0]; //Extract the desired size
-    color = analysys_result[1]; //Extract the desired color
+    size.data = analysys_result[0]; //Extract the desired size
+    color.data = analysys_result[1]; //Extract the desired color
 
   //Select goal (Small, medium or large tables)
     desiredAction_publisher.publish(size);
 
   //Wait for the robot to arrive
-    //TODO!!!! Como esperar a que llegue al objetivo (llegar a entre las cajas)
+    waitUntil_GoalReached();
 
-  //Turn around searching the desired color box
+  //Turn around searching the desired color box and pick the object
     color_publisher.publish(color); //Publish the desired color
-    desiredAction_publisher.publish(7); //Scan environment and pick object
+    size.data = 7;
+    desiredAction_publisher.publish(size); //Scan environment and pick object
 
-  //Wait 1 sec (simulate that the robot is picking the object)
+  //Wait until the object is picked
+    waitUntil_GoalReached();
 
   //Select goal (window 1 (S), window 2 (M) or window 3 (L))
-    desiredAction_publisher.publish(0); //size+3
+    size.data = 7; //TODO: Cambiar por "size+3" (tras implementar casos 4, 5 y 6 en "goal_publisher")
+    desiredAction_publisher.publish(size);
 
   //Wait for the robot to arrive and 1 sec (simulate that the robot is giving the object)
-    //TODO!!!! Como esperar a que llegue al objetivo (llegar a entre las cajas)
+    waitUntil_GoalReached();
 
   //Leave the warehouse
-desiredAction_publisher.publish(size+3);
+    size.data = 0;
+    desiredAction_publisher.publish(size);
 
+  //Wait for the robot to leave
+    waitUntil_GoalReached();
 
   return 0;
 }
@@ -107,7 +112,6 @@ std::vector<int> analyzePetition(std::string petition)
     std::vector<int> ret;
 
     //Find the desired size
-    std::size_t found;
     if (petition.find("pequeña"))
         ret[0] = 1;
     else if (petition.find("mediana"))
@@ -136,4 +140,12 @@ std::vector<int> analyzePetition(std::string petition)
     }
 
     return ret;
+}
+
+
+void waitUntil_GoalReached()
+{
+    while(!goal_reached){}
+
+    return;
 }

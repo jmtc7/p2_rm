@@ -12,11 +12,13 @@
 #include <actionlib/client/simple_action_client.h>
 #include <std_msgs/Int32.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Float64MultiArray.h>
+#include "geometry_msgs/PoseWithCovarianceStamped.h"
 
 //Declarations
 void scanAreas(); //Function to rotate the turtlebot scanning the areas of the desired color (R/G/B) and pick the object from the orientation in which the area is the biggest
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-
+bool error = 0;
 
 
 /*
@@ -63,7 +65,9 @@ void colorCallback(const std_msgs::Int32::ConstPtr& msg)
 
 void areaCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
-    areas = msg.data;
+    areas[0] = msg->data[0];
+    areas[1] = msg->data[1];
+    areas[2] = msg->data[2];
 
     return;
 }
@@ -190,6 +194,15 @@ void scanAreas()
   float theta, theta_maxArea;//Robot orientation and orientation in which the maximum area was perceived
   float max_area; //Maximum perceived area so far
 
+
+  MoveBaseClient ac("move_base", true); //Action client
+    
+  //Wait for the action server to come up
+  while(!ac.waitForServer(ros::Duration(5.0)))
+  {
+    ROS_INFO("Waiting for the move_base action server to come up");
+  }
+
   //Configure current pose
     //General goal configuration
       move_base_msgs::MoveBaseGoal goal; //ROS message to send
@@ -220,7 +233,7 @@ void scanAreas()
   if (max_area == 0)
   {
       error = 1;
-      std::cout << "[!] ERROR: No se ha detectado ningun area del color buscado"
+      std::cout << "[!] ERROR: No se ha detectado ningun area del color buscado" << std::endl;
   }
   else //Rotate and "pick" the object
   {
