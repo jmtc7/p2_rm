@@ -149,8 +149,12 @@ std::vector<int> analyzePetition(std::string petition)
 
 void waitUntil_GoalReached()
 {
+    ros::spinOnce(); //Attend pending callbacks
+    
     while(!goal_reached)
+    {
         ros::spinOnce(); //Attend pending callbacks
+    }
 
     return;
 }

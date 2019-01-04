@@ -38,7 +38,7 @@ void selectionCallback(const std_msgs::Int32::ConstPtr& msg)
 {
   int sel_aux = msg->data;
   
-  if(sel_aux>0 and sel_aux<7) //Si se ha publicado una seleccion de pose valida
+  if(sel_aux>=0 and sel_aux<=7) //Si se ha publicado una seleccion de pose valida
   {
     selection = sel_aux;
   }
