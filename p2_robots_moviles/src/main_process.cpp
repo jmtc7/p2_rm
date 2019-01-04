@@ -58,13 +58,13 @@ int main(int argc, char** argv)
     std_msgs::Int32 size, color; //Store the asked size and color
     std::vector<int> analysys_result; //Store the result of the analysys
 
-    std::cout << "¿Qué objeto desea? (Caja [Pequeña/mediana/grande] [roja/verde/azul]):" << std::endl;
+    std::cout << "¿Qué objeto desea? (Caja [pequeña/mediana/grande] [roja/verde/azul]):" << std::endl;
     std::getline(std::cin, petition); //Store the input in "petition"
 
     //Analyze petition
     analysys_result = analyzePetition(petition);
-    size.data = analysys_result[0]; //Extract the desired size
-    color.data = analysys_result[1]; //Extract the desired color
+    size.data = analysys_result.at(0); //Extract the desired size
+    color.data = analysys_result.at(1); //Extract the desired color
 
   //Select goal (Small, medium or large tables)
     desiredAction_publisher.publish(size);
@@ -111,30 +111,33 @@ std::vector<int> analyzePetition(std::string petition)
 {
     std::vector<int> ret;
 
+
     //Find the desired size
-    if (petition.find("pequeña"))
-        ret[0] = 1;
-    else if (petition.find("mediana"))
-        ret[0] = 2;
-    else if (petition.find("grande"))
-        ret[0] = 3;
+    if (petition.find("pequeña") != std::string::npos)
+        ret.push_back(1);
+    else if (petition.find("mediana") != std::string::npos)
+        ret.push_back(2);
+    else if (petition.find("grande") != std::string::npos)
+        ret.push_back(3);
     else
     {
         error = true;
+        ret.push_back(0); //Keep being outside the warehouse
         std::cout << "[!] ERROR: No se ha detectado un tamaño válido en la petición" << std::endl;
         std::cout << "    Tamaños válidos: pequeña, mediana, grande" << std::endl;
     }
 
     //Find the desired colour
-    if (petition.find("roja"))
-        ret[1] = 0;
-    else if (petition.find("verde"))
-        ret[1] = 1;
-    else if (petition.find("azul"))
-        ret[1] = 2;
+    if (petition.find("roja") != std::string::npos)
+        ret.push_back(0);
+    else if (petition.find("verde") != std::string::npos)
+        ret.push_back(1);
+    else if (petition.find("azul") != std::string::npos)
+        ret.push_back(2);
     else
     {
         error = true;
+        ret.push_back(0); //Give a value for the color (doesnt mind)
         std::cout << "[!] ERROR: No se ha detectado un color válido en la petición" << std::endl;
         std::cout << "    Colores válidos: roja, verde, azul" << std::endl;
     }
