@@ -81,7 +81,7 @@ int main(int argc, char** argv)
     waitUntil_GoalReached();
 
   //Select goal (window 1 (S), window 2 (M) or window 3 (L))
-    size.data = 7; //TODO: Cambiar por "size+3" (tras implementar casos 4, 5 y 6 en "goal_publisher")
+    size.data = analysys_result.at(0)+3;
     desiredAction_publisher.publish(size);
 
   //Wait for the robot to arrive and 1 sec (simulate that the robot is giving the object)
@@ -146,9 +146,11 @@ std::vector<int> analyzePetition(std::string petition)
 }
 
 
+
 void waitUntil_GoalReached()
 {
-    while(!goal_reached){}
+    while(!goal_reached)
+        ros::spinOnce(); //Attend pending callbacks
 
     return;
 }

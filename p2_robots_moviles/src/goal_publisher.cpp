@@ -38,7 +38,7 @@ void selectionCallback(const std_msgs::Int32::ConstPtr& msg)
 {
   int sel_aux = msg->data;
   
-  if(sel_aux==0 or sel_aux==1 or sel_aux==2 or sel_aux==3 or sel_aux==7) //Si se ha publicado una seleccion de pose valida
+  if(sel_aux>0 and sel_aux<7) //Si se ha publicado una seleccion de pose valida
   {
     selection = sel_aux;
   }
@@ -49,7 +49,10 @@ void selectionCallback(const std_msgs::Int32::ConstPtr& msg)
     std::cout << "  '1': Ir a por objetos S" << std::endl;
     std::cout << "  '2': Ir a por objetos M" << std::endl;
     std::cout << "  '3': Ir a por objetos L" << std::endl;
-    std::cout << "  '7': Escanear de areas" << std::endl;
+    std::cout << "  '4': Dejar objeto S en ventana 1" << std::endl;
+    std::cout << "  '5': Dejar objeto M en ventana 2" << std::endl;
+    std::cout << "  '6': Dejar objeto L en ventana 3" << std::endl;
+    std::cout << "  '7': Escaneo de areas" << std::endl;
 
   }
 }
@@ -122,6 +125,9 @@ int main(int argc, char** argv)
   const float pose_s[3] = {5, 5, 1}; //Go to the small objects
   const float pose_m[3] = {2, 8, 1}; //Medium objects
   const float pose_l[3] = {7, 9, 1}; //Large objs.
+  const float pose_ws[3] = {7, 5, 1}; //Go to the small objects window
+  const float pose_wm[3] = {4, 8, 1}; //Medium objects window
+  const float pose_wl[3] = {5, 9, 1}; //Large objs. w.
 
 
   while (ros::ok())
@@ -149,11 +155,26 @@ int main(int argc, char** argv)
           goal.target_pose.pose.position.y = pose_l[1];
           goal.target_pose.pose.orientation.w = pose_l[2];
         break;
+        case 4:
+          goal.target_pose.pose.position.x = pose_ws[0];
+          goal.target_pose.pose.position.y = pose_ws[1];
+          goal.target_pose.pose.orientation.w = pose_ws[2];
+        break;
+        case 5:
+          goal.target_pose.pose.position.x = pose_wm[0];
+          goal.target_pose.pose.position.y = pose_wm[1];
+          goal.target_pose.pose.orientation.w = pose_wm[2];
+        break;
+        case 6:
+          goal.target_pose.pose.position.x = pose_wl[0];
+          goal.target_pose.pose.position.y = pose_wl[1];
+          goal.target_pose.pose.orientation.w = pose_wl[2];
+        break;
         case 7:
           scanAreas();
         break;
         default:
-          std::cout << "[!] ERROR: Opcion ilegal introducida. Opciones validas: '0'. 1', '2', '3' y '7'" << std::endl;
+          std::cout << "[!] ERROR: Opcion ilegal introducida. Opciones validas: '0', '1', '2', '3', '4', '5', '6' y '7'" << std::endl;
           return 0;
         break;
       }
@@ -165,15 +186,15 @@ int main(int argc, char** argv)
       ac.sendGoal(goal);
       ac.waitForResult();
 
-      if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+      if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
         ROS_INFO("[*] Exito! Goal alcanzado");
       else
         ROS_INFO("[!] ERROR! No ha sido posible alcanzar el goal");
 
-      goalReached.data = true;
-      goalReached_publisher.publish(goalReached); //Indicate the robot is in the desired pose
-
       ros::spinOnce();
+
+      goalReached.data = true;
+      goalReached_publisher.publish(goalReached); //Indicate the robot has finished the job
   }
 
   return 0;
