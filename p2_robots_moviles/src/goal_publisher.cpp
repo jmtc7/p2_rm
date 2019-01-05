@@ -14,6 +14,8 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float64MultiArray.h>
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
+#include <tf/LinearMath/Quaternion.h> //To create and use quaternions
+#include <tf/transform_datatypes.h> //Convert from tf quaternions to msg quat.
 
 //Declarations
 void scanAreas(); //Function to rotate the turtlebot scanning the areas of the desired color (R/G/B) and pick the object from the orientation in which the area is the biggest
@@ -129,6 +131,10 @@ int main(int argc, char** argv)
   const float pose_wm[3] = {4, 8, 1}; //Medium objects window
   const float pose_wl[3] = {5, 9, 1}; //Large objs. w.
 
+  //Initialize areas vector
+  areas.push_back(0.0);
+  areas.push_back(0.0);
+  areas.push_back(0.0);
 
   while (ros::ok())
   {
@@ -237,8 +243,14 @@ void scanAreas()
   ROS_INFO("[*] Escaneando colores...");
   for (theta=0; theta<3.142; theta+=0.02)
   {
-    //Move the robot to the new orientation
-    goal.target_pose.pose.orientation.w = theta; //Update theta
+    //Generate quaternion?????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+    tf::Quaternion quat;
+    geometry_msgs::Quaternion quat_msg;
+    quat.setRPY( 0, 0, theta);  // Create this quaternion from roll/pitch/yaw (in radians)
+    quat.normalize();
+    tf::quaternionTFToMsg(quat, goal.target_pose.pose.orientation);
+
+    //Move the robot to the orientation in which the biggest area of the desired color was registered
     ac.sendGoal(goal);
     ac.waitForResult();
 
@@ -258,8 +270,14 @@ void scanAreas()
   }
   else //Rotate and "pick" the object
   {
+    //Generate quaternion?????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+    tf::Quaternion quat;
+    geometry_msgs::Quaternion quat_msg;
+    quat.setRPY( 0, 0, theta_maxArea );  // Create this quaternion from roll/pitch/yaw (in radians)
+    quat.normalize();
+    tf::quaternionTFToMsg(quat, goal.target_pose.pose.orientation);
+
     //Move the robot to the orientation in which the biggest area of the desired color was registered
-    goal.target_pose.pose.orientation.w = theta; //Update theta
     ac.sendGoal(goal);
     ac.waitForResult();
   }
