@@ -139,6 +139,10 @@ int main(int argc, char** argv)
 
   while (ros::ok())
   {
+    //Indicar que no se ha procesado ni alcanzado el nuevo objetivo
+      goalReached.data = false;
+      goalReached_publisher.publish(goalReached); //Indicate the robot is bussy traveling
+
       //Moverse al goal seleccionado
       switch (selection)
       {
@@ -185,9 +189,6 @@ int main(int argc, char** argv)
           return 0;
         break;
       }
-      
-      goalReached.data = false;
-      goalReached_publisher.publish(goalReached); //Indicate the robot is bussy traveling
 
       ROS_INFO("[*] Enviando goal...");
       ac.sendGoal(goal);
