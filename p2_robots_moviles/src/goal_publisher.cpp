@@ -19,6 +19,7 @@
 
 //Declarations
 void scanAreas(); //Function to rotate the turtlebot scanning the areas of the desired color (R/G/B) and pick the object from the orientation in which the area is the biggest
+geometry_msgs::Quaternion getQuatMsgFromTheta(float theta); //Returns a normalized quaternion given an orientation (Yaw angle)
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 bool error = 0;
 
@@ -218,7 +219,7 @@ int main(int argc, char** argv)
 
 void scanAreas()
 {
-  float theta, theta_maxArea;//Robot orientation and orientation in which the maximum area was perceived
+  float theta_ini, theta, theta_maxArea;//Robot initial orientation, orientation and orientation in which the maximum area was perceived
   float max_area; //Maximum perceived area so far
 
 
@@ -243,14 +244,8 @@ void scanAreas()
   ROS_INFO("[*] Escaneando colores...");
   for (theta=0; theta<3.142; theta+=0.02)
   {
-    //Generate quaternion?????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-    tf::Quaternion quat;
-    geometry_msgs::Quaternion quat_msg;
-    quat.setRPY( 0, 0, theta);  // Create this quaternion from roll/pitch/yaw (in radians)
-    quat.normalize();
-    tf::quaternionTFToMsg(quat, goal.target_pose.pose.orientation);
-
     //Move the robot to the orientation in which the biggest area of the desired color was registered
+    goal.target_pose.pose.orientation = getQuatMsgFromTheta(theta);
     ac.sendGoal(goal);
     ac.waitForResult();
 
@@ -270,17 +265,25 @@ void scanAreas()
   }
   else //Rotate and "pick" the object
   {
-    //Generate quaternion?????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-    tf::Quaternion quat;
-    geometry_msgs::Quaternion quat_msg;
-    quat.setRPY( 0, 0, theta_maxArea );  // Create this quaternion from roll/pitch/yaw (in radians)
-    quat.normalize();
-    tf::quaternionTFToMsg(quat, goal.target_pose.pose.orientation);
-
     //Move the robot to the orientation in which the biggest area of the desired color was registered
+    goal.target_pose.pose.orientation = getQuatMsgFromTheta(theta_maxArea);
     ac.sendGoal(goal);
     ac.waitForResult();
   }
 
   return;
+}
+
+geometry_msgs::Quaternion getQuatMsgFromTheta(float theta)
+{
+  //Quaternion variables
+    tf::Quaternion quat; //TF quaternion
+    geometry_msgs::Quaternion quat_msg; //Msg quaternion
+
+  //Generate quaternion
+    quat.setRPY( 0, 0, theta);  //Create the quaternion from roll/pitch/yaw (in radians)
+    quat.normalize();
+    tf::quaternionTFToMsg(quat, quat_msg);
+
+  return quat_msg;
 }
