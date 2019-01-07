@@ -1,7 +1,7 @@
 # rqt_graph_general.png
 Image containing the rosgraph with all the system launched (using 2D simulation in Stage)
 
-#stage_map.png
+# stage_map.png
 Top view of the 2D environment (in Stage) used for testing
 
 # gazebo_map.png
