@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     ros::Subscriber action_getter = nh.subscribe("/desiredAction", 1, selectionCallback); //Action selection subscriber
     ros::Subscriber color_getter = nh.subscribe("/desiredColor", 1, colorCallback); //AMCL pose subscriber
     ros::Subscriber pose_getter = nh.subscribe("/amcl_pose", 1, poseCallback); //AMCL pose subscriber
-    ros::Subscriber area_subscriber = nh.subscribe("/areas", 1, areaCallback); //Color areas subscriber
+    ros::Subscriber area_subscriber = nh.subscribe("/rgb_areas", 1, areaCallback); //Color areas subscriber
     ros::Publisher goalReached_publisher = nh.advertise<std_msgs::Bool>("/goal_reached", 1); //Publisher to tell if the robot is moving or not
     MoveBaseClient ac("move_base", true); //Action client
 

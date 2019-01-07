@@ -89,9 +89,9 @@ int main(int argc, char **argv)
 
     //Camera subscriber
 	image_transport::ImageTransport it(nh);
-	image_transport::Subscriber sub = it.subscribe("/webcam/image_raw", 1, imageCallback); //Camera topic subscriber (pc)
+	//image_transport::Subscriber sub = it.subscribe("/webcam/image_raw", 1, imageCallback); //Camera topic subscriber (pc)
 	//image_transport::Subscriber sub = it.subscribe("/pepper_robot/naoqi_driver/camera/front/image_raw", 1, imageCallback); //Camera topic subscriber (pepper)
-    //image_transport::Subscriber sub = it.subscribe("/camera/rgb/image_raw", 1, imageCallback); //Camera topic subscriber (pc) (RGB astra)
+    image_transport::Subscriber sub = it.subscribe("/camera/rgb/image_raw", 1, imageCallback); //Camera topic subscriber (pc) (RGB astra)
 
     //Areas publishers
       ros::Publisher areas_publisher = nh.advertise<std_msgs::Float64MultiArray>("/rgb_areas", 1);
