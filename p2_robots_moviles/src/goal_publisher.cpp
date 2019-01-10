@@ -124,13 +124,13 @@ int main(int argc, char** argv)
   goal.target_pose.header.stamp = ros::Time::now();
 
   //Goals declarations
-  const float pose_home[3] = {2, 2, 1}; //Home (Outside the warehouse)
-  const float pose_s[3] = {5, 5, 1}; //Go to the small objects
-  const float pose_m[3] = {2, 8, 1}; //Medium objects
-  const float pose_l[3] = {7, 9, 1}; //Large objs.
-  const float pose_ws[3] = {7, 5, 1}; //Go to the small objects window
-  const float pose_wm[3] = {4, 8, 1}; //Medium objects window
-  const float pose_wl[3] = {5, 9, 1}; //Large objs. w.
+  const float pose_home[3] = {22, 25, 1}; //Home (Outside the warehouse) //[0, 0, 0, 1]
+  const float pose_s[3] = {20, 16, 1}; //Go to the small objects
+  const float pose_m[3] = {20, 12, 1}; //Medium objects
+  const float pose_l[3] = {17, 12, 1}; //Large objs.
+  const float pose_ws[3] = {14, 16, 1}; //Go to the small objects window //[0, 0, 1, 0]
+  const float pose_wm[3] = {15, 13, 1}; //Medium objects window
+  const float pose_wl[3] = {15, 10, 1}; //Large objs. w.
 
   //Initialize areas vector
   areas.push_back(0.0);
