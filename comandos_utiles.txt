@@ -1,0 +1,20 @@
+#Lazar simulacion y visualización (2D)
+roslaunch p2_robots_moviles turtlebot_in_stage.launch
+
+#Lanzar nodos
+rosrun p2_robots_moviles area_publisher #Publica areas RGB en "/rgb_areas" (vector de floats)
+rosrun p2_robots_moviles goal_publisher #Lee accion deseada de "/desiredAction" y manda al robot a sitios o hace el escaneo
+rosrun p2_robots_moviles main_process #Envia objetivos y espera respuestas del nodo "goal_publisher"
+
+
+#Publicar poses objetivos
+rostopic pub /desiredAction std_msgs/Int32 [0, 1, 2, 3, 4, 5, o 7] -1
+
+#Mostrar por terminal lo que se esta publicando en un topic
+rostopic echo [nombre topic (ej. /desiredAction)]
+
+
+#Lanzar simulacin y visualizacion (3D, sin crear launchfile) -> OJO! Pueden necesitarse rutas completas!!
+roslaunch turtlebot_gazebo_p4 amcl_demo.launch [nombre mapa (ej. map_pr2.yaml)]
+roslaunch turtlebot_gazebo_p4 turtlebot_world.launch [nombre mapa (ej. map_pr2.yaml)]
+roslaunch turtlebot_rviz_launchers view_navigation.launch
