@@ -20,6 +20,7 @@
 //Declarations
 void scanAreas(); //Function to rotate the turtlebot scanning the areas of the desired color (R/G/B) and pick the object from the orientation in which the area is the biggest
 geometry_msgs::Quaternion getQuatMsgFromTheta(float theta); //Returns a normalized quaternion given an orientation (Yaw angle)
+void updateGoal(move_base_msgs::MoveBaseGoal& goal, const float poses[7][4], int selectedGoal); //Load the "pose" number "selectedGoal" into the "goal" variable
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 bool error = 0;
 
@@ -32,7 +33,7 @@ bool error = 0;
 ***************************
 */
 
-int selection = 0; //Received action (move to the poses 0, 1, 2 or 3 or perform the color area scanning)ç
+int selection = 0; //Received action (move to the poses 0, 1, 2 or 3 or perform the color area scanning)
 int color = 0; //Received desired color (0, 1 or 2 -> red, green or blue)
 std::vector<float> areas; //Received areas of each color (R, G and B)
 std::vector<float> current_position(2); //Readed position (X and Y obtained thanks to AMCL)
@@ -125,12 +126,15 @@ int main(int argc, char** argv)
 
   //Goals declarations
   const float pose_home[3] = {22, 25, 1}; //Home (Outside the warehouse) //[0, 0, 0, 1]
-  const float pose_s[3] = {20, 16, 1}; //Go to the small objects
-  const float pose_m[3] = {20, 12, 1}; //Medium objects
-  const float pose_l[3] = {17, 12, 1}; //Large objs.
+  const float pose_s[3] = {19.5, 16.5, 1}; //Go to the small objects
+  const float pose_m[3] = {19.5, 11.8, 1}; //Medium objects - 19.5; 11.8
+  const float pose_l[3] = {16.5, 11.5, 1}; //Large objs - 16.5; 11.5
   const float pose_ws[3] = {14, 16, 1}; //Go to the small objects window //[0, 0, 1, 0]
   const float pose_wm[3] = {15, 13, 1}; //Medium objects window
   const float pose_wl[3] = {15, 10, 1}; //Large objs. w.
+
+  //Create a vector with the poses (helps to access to them in a more elegant way)
+  const float poses[7][4] = {{22, 25, 0, 1}, {19.5, 16.5, 0, 1}, {19.5, 11.8, 0, 1}, {16.5, 11.5, 1, 0}, {14, 16, 1, 0}, {15, 13, 1, 0}, {15, 10, 1, 0}};
 
   //Initialize areas vector
   areas.push_back(0.0);
@@ -142,53 +146,72 @@ int main(int argc, char** argv)
     //Indicar que no se ha procesado ni alcanzado el nuevo objetivo
       goalReached.data = false;
       goalReached_publisher.publish(goalReached); //Indicate the robot is bussy traveling
-
+/*
       //Moverse al goal seleccionado
       switch (selection)
       {
-        case 0:
+        case 0: //Warehouse entry
           goal.target_pose.pose.position.x = pose_home[0];
           goal.target_pose.pose.position.y = pose_home[1];
-          goal.target_pose.pose.orientation.w = pose_home[2];
+          goal.target_pose.pose.orientation.z = 0;
+          goal.target_pose.pose.orientation.w = 1;
         break;
-        case 1:
+        case 1: //Small boxes
           goal.target_pose.pose.position.x = pose_s[0];
           goal.target_pose.pose.position.y = pose_s[1];
-          goal.target_pose.pose.orientation.w = pose_s[2];
+          goal.target_pose.pose.orientation.z = 0;
+          goal.target_pose.pose.orientation.w = 1;
         break;
-        case 2:
+        case 2: //Medium boxes
           goal.target_pose.pose.position.x = pose_m[0];
           goal.target_pose.pose.position.y = pose_m[1];
-          goal.target_pose.pose.orientation.w = pose_m[2];
+          goal.target_pose.pose.orientation.z = 0;
+          goal.target_pose.pose.orientation.w = 1;
         break;
-        case 3:
+        case 3: //Large boxes
           goal.target_pose.pose.position.x = pose_l[0];
           goal.target_pose.pose.position.y = pose_l[1];
-          goal.target_pose.pose.orientation.w = pose_l[2];
+          goal.target_pose.pose.orientation.z = 1;
+          goal.target_pose.pose.orientation.w = 0;
         break;
-        case 4:
+        case 4: //Window 1
           goal.target_pose.pose.position.x = pose_ws[0];
           goal.target_pose.pose.position.y = pose_ws[1];
-          goal.target_pose.pose.orientation.w = pose_ws[2];
+          goal.target_pose.pose.orientation.z = 1;
+          goal.target_pose.pose.orientation.w = 0;
         break;
-        case 5:
+        case 5: //Window 2
           goal.target_pose.pose.position.x = pose_wm[0];
           goal.target_pose.pose.position.y = pose_wm[1];
-          goal.target_pose.pose.orientation.w = pose_wm[2];
+          goal.target_pose.pose.orientation.z = 1;
+          goal.target_pose.pose.orientation.w = 0;
         break;
-        case 6:
+        case 6: //Window 3
           goal.target_pose.pose.position.x = pose_wl[0];
           goal.target_pose.pose.position.y = pose_wl[1];
-          goal.target_pose.pose.orientation.w = pose_wl[2];
+          goal.target_pose.pose.orientation.z = 1;
+          goal.target_pose.pose.orientation.w = 0;
         break;
-        case 7:
+        case 7: //Scan areas
           scanAreas();
         break;
         default:
           std::cout << "[!] ERROR: Opcion ilegal introducida. Opciones validas: '0', '1', '2', '3', '4', '5', '6' y '7'" << std::endl;
           return 0;
         break;
+      }*/
+
+      //Evaluate the selected action
+      if(selection>=0 and selection<7)
+	updateGoal(goal, poses, selection); //Update the goal
+      else if (selection == 7)
+	scanAreas(); //Scan areas
+      else
+      {
+	std::cout << "[!] ERROR: Opcion ilegal introducida. Opciones validas: '0', '1', '2', '3', '4', '5', '6' y '7'" << std::endl;
+        return 0;
       }
+
 
       ROS_INFO("[*] Enviando goal...");
       ac.sendGoal(goal);
@@ -245,6 +268,9 @@ void scanAreas()
   ROS_INFO("[*] Escaneando colores...");
   for (theta=0; theta<3.142; theta+=0.02)
   {
+    //Update the areas (attending the pending callbacks)
+	ros::spinOnce();
+
     //Move the robot to the orientation in which the biggest area of the desired color was registered
     goal.target_pose.pose.orientation = getQuatMsgFromTheta(theta);
     ac.sendGoal(goal);
@@ -275,6 +301,7 @@ void scanAreas()
   return;
 }
 
+
 geometry_msgs::Quaternion getQuatMsgFromTheta(float theta)
 {
   //Quaternion variables
@@ -287,4 +314,16 @@ geometry_msgs::Quaternion getQuatMsgFromTheta(float theta)
     tf::quaternionTFToMsg(quat, quat_msg);
 
   return quat_msg;
+}
+
+
+void updateGoal(move_base_msgs::MoveBaseGoal& goal, const float poses[7][4], int selectedGoal)
+{
+  //Update goal
+    goal.target_pose.pose.position.x = poses[selectedGoal][0];
+    goal.target_pose.pose.position.y = poses[selectedGoal][1];
+    goal.target_pose.pose.orientation.z = poses[selectedGoal][2];
+    goal.target_pose.pose.orientation.w = poses[selectedGoal][3];
+
+  return;
 }
