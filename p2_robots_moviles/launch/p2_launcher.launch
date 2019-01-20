@@ -1,0 +1,15 @@
+<launch>
+
+  <!-- 3D Gazebo simulation -->
+  <include file="$(find p2_robots_moviles)/launch/gazebo.launch"/>
+
+  <!-- Navigation stack -->
+  <include file="$(find p2_robots_moviles)/launch/amcl.launch">
+    <arg name="initial_pose_x" value="15.0"/>
+    <arg name="initial_pose_y" value="15.0"/>
+  </include>
+
+  <!-- Navigation RViz viewer -->
+  <include file="$(find turtlebot_rviz_launchers)/launch/view_navigation.launch"/>
+
+</launch>
