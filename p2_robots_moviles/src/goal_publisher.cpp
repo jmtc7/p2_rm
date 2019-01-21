@@ -134,7 +134,7 @@ int main(int argc, char** argv)
   const float pose_wl[3] = {15, 10, 1}; //Large objs. w.
 
   //Create a vector with the poses (helps to access to them in a more elegant way)
-  const float poses[7][4] = {{22, 25, 0, 1}, {19.5, 16.5, 0, 1}, {19.5, 11.8, 0, 1}, {16.5, 11.5, 1, 0}, {14, 16, 1, 0}, {15, 13, 1, 0}, {15, 10, 1, 0}};
+  const float poses[7][4] = {{22, 25, 0, 1}, {19.5, 16.5, 0, 1}, {19.5, 11.8, 0, 1}, {16.5, 11.5, 1, 0}, {14.5, 16, 1, 0}, {14.5, 13, 1, 0}, {14.5, 10, 1, 0}};
 
   //Initialize areas vector
   areas.push_back(0.0);
