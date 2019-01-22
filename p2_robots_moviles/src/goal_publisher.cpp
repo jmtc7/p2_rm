@@ -23,6 +23,7 @@ geometry_msgs::Quaternion getQuatMsgFromTheta(float theta); //Returns a normaliz
 void updateGoal(move_base_msgs::MoveBaseGoal& goal, const float poses[7][4], int selectedGoal); //Load the "pose" number "selectedGoal" into the "goal" variable
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 bool error = 0;
+bool big_box_exception = false;
 
 
 /*
@@ -203,12 +204,19 @@ int main(int argc, char** argv)
 
       //Evaluate the selected action
       if(selection>=0 and selection<7)
-	updateGoal(goal, poses, selection); //Update the goal
+      {
+      	updateGoal(goal, poses, selection); //Update the goal
+      	if(selection == 3)
+      		big_box_exception = true;
+      	else
+      		big_box_exception = false;
+      }
+	
       else if (selection == 7)
-	scanAreas(); //Scan areas
+		scanAreas(); //Scan areas
       else
       {
-	std::cout << "[!] ERROR: Opcion ilegal introducida. Opciones validas: '0', '1', '2', '3', '4', '5', '6' y '7'" << std::endl;
+		std::cout << "[!] ERROR: Opcion ilegal introducida. Opciones validas: '0', '1', '2', '3', '4', '5', '6' y '7'" << std::endl;
         return 0;
       }
 
@@ -243,9 +251,9 @@ int main(int argc, char** argv)
 
 void scanAreas()
 {
-  float theta_ini, theta, theta_maxArea;//Robot initial orientation, orientation and orientation in which the maximum area was perceived
+  float theta_ini, theta, theta_maxArea, theta_multiplier;//Robot initial orientation, orientation and orientation in which the maximum area was perceived
   float max_area; //Maximum perceived area so far
-
+  float increment_multiplier;
 
   MoveBaseClient ac("move_base", true); //Action client
     
@@ -266,8 +274,19 @@ void scanAreas()
   
   //Turn in sections of 0.02 rad (1º aprox.)
   ROS_INFO("[*] Escaneando colores...");
-  for (theta=0; theta<3.142; theta+=0.02)
+  if(big_box_exception)
   {
+  	theta_multiplier = 3;
+  	increment_multiplier = -1;
+  }
+  else
+  {
+  	theta_multiplier = 1;
+  	increment_multiplier = 1;
+  }
+  for (theta=-increment_multiplier*3.142/2; theta<theta_multiplier*3.142/2; theta+=0.02) //Ir desde -90 a 90 grados
+  {
+
     //Update the areas (attending the pending callbacks)
 	ros::spinOnce();
 
