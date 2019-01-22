@@ -14,6 +14,7 @@ std::vector<int> analyzePetition(std::string petition);
 void waitUntil_GoalReached(); //Function that blocks the program until the setted goal is reached
 
 
+
 /*
 ***************************
 ***************************
@@ -27,9 +28,9 @@ bool goal_reached; //Variable to flag if the turtlebot has or hasnt arrived to t
 
 void goalReachedCallback(const std_msgs::Bool::ConstPtr& msg)
 {
-    goal_reached = msg->data;
+  goal_reached = msg->data;
 
-    return;
+  return;
 }
 
 
@@ -62,9 +63,9 @@ int main(int argc, char** argv)
     std::getline(std::cin, petition); //Store the input in "petition"
 
     //Analyze petition
-    analysys_result = analyzePetition(petition);
-    size.data = analysys_result.at(0); //Extract the desired size
-    color.data = analysys_result.at(1); //Extract the desired color
+      analysys_result = analyzePetition(petition);
+      size.data = analysys_result.at(0); //Extract the desired size
+      color.data = analysys_result.at(1); //Extract the desired color
 
   //Select goal (Small, medium or large tables)
     desiredAction_publisher.publish(size);
@@ -109,52 +110,52 @@ int main(int argc, char** argv)
 
 std::vector<int> analyzePetition(std::string petition)
 {
-    std::vector<int> ret;
+  std::vector<int> ret;
 
 
-    //Find the desired size
+  //Find the desired size
     if (petition.find("pequeña") != std::string::npos)
-        ret.push_back(1);
+      ret.push_back(1);
     else if (petition.find("mediana") != std::string::npos)
-        ret.push_back(2);
+      ret.push_back(2);
     else if (petition.find("grande") != std::string::npos)
-        ret.push_back(3);
+      ret.push_back(3);
     else
     {
-        error = true;
-        ret.push_back(0); //Keep being outside the warehouse
-        std::cout << "[!] ERROR: No se ha detectado un tamaño válido en la petición" << std::endl;
-        std::cout << "    Tamaños válidos: pequeña, mediana, grande" << std::endl;
+      error = true;
+      ret.push_back(0); //Keep being outside the warehouse
+      std::cout << "[!] ERROR: No se ha detectado un tamaño válido en la petición" << std::endl;
+      std::cout << "    Tamaños válidos: pequeña, mediana, grande" << std::endl;
     }
 
-    //Find the desired colour
+  //Find the desired colour
     if (petition.find("roja") != std::string::npos)
-        ret.push_back(0);
+      ret.push_back(0);
     else if (petition.find("verde") != std::string::npos)
-        ret.push_back(1);
+      ret.push_back(1);
     else if (petition.find("azul") != std::string::npos)
-        ret.push_back(2);
+      ret.push_back(2);
     else
     {
-        error = true;
-        ret.push_back(0); //Give a value for the color (doesnt mind)
-        std::cout << "[!] ERROR: No se ha detectado un color válido en la petición" << std::endl;
-        std::cout << "    Colores válidos: roja, verde, azul" << std::endl;
+      error = true;
+      ret.push_back(0); //Give a value for the color (doesnt mind)
+      std::cout << "[!] ERROR: No se ha detectado un color válido en la petición" << std::endl;
+      std::cout << "    Colores válidos: roja, verde, azul" << std::endl;
     }
 
-    return ret;
+  return ret;
 }
 
 
 
 void waitUntil_GoalReached()
 {
+  ros::spinOnce(); //Attend pending callbacks
+  
+  while(!goal_reached)
+  {
     ros::spinOnce(); //Attend pending callbacks
-    
-    while(!goal_reached)
-    {
-        ros::spinOnce(); //Attend pending callbacks
-    }
+  }
 
-    return;
+  return;
 }

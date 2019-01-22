@@ -7,23 +7,23 @@
 */
 
 //Include dependencies
-#include <ros/ros.h>
-#include <move_base_msgs/MoveBaseAction.h>
-#include <actionlib/client/simple_action_client.h>
-#include <std_msgs/Int32.h>
-#include <std_msgs/Bool.h>
-#include <std_msgs/Float64MultiArray.h>
-#include "geometry_msgs/PoseWithCovarianceStamped.h"
-#include <tf/LinearMath/Quaternion.h> //To create and use quaternions
-#include <tf/transform_datatypes.h> //Convert from tf quaternions to msg quat.
+  #include <ros/ros.h>
+  #include <move_base_msgs/MoveBaseAction.h>
+  #include <actionlib/client/simple_action_client.h>
+  #include <std_msgs/Int32.h>
+  #include <std_msgs/Bool.h>
+  #include <std_msgs/Float64MultiArray.h>
+  #include "geometry_msgs/PoseWithCovarianceStamped.h"
+  #include <tf/LinearMath/Quaternion.h> //To create and use quaternions
+  #include <tf/transform_datatypes.h> //Convert from tf quaternions to msg quat.
 
 //Declarations
-void scanAreas(); //Function to rotate the turtlebot scanning the areas of the desired color (R/G/B) and pick the object from the orientation in which the area is the biggest
-geometry_msgs::Quaternion getQuatMsgFromTheta(float theta); //Returns a normalized quaternion given an orientation (Yaw angle)
-void updateGoal(move_base_msgs::MoveBaseGoal& goal, const float poses[7][4], int selectedGoal); //Load the "pose" number "selectedGoal" into the "goal" variable
-typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-bool error = 0;
-bool big_box_exception = false;
+  void scanAreas(); //Function to rotate the turtlebot scanning the areas of the desired color (R/G/B) and pick the object from the orientation in which the area is the biggest
+  geometry_msgs::Quaternion getQuatMsgFromTheta(float theta); //Returns a normalized quaternion given an orientation (Yaw angle)
+  void updateGoal(move_base_msgs::MoveBaseGoal& goal, const float poses[7][4], int selectedGoal); //Load the "pose" number "selectedGoal" into the "goal" variable
+  typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+  bool error = 0;
+  bool big_box_exception = false;
 
 
 /*
@@ -73,11 +73,11 @@ void colorCallback(const std_msgs::Int32::ConstPtr& msg)
 
 void areaCallback(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
-    areas[0] = msg->data[0];
-    areas[1] = msg->data[1];
-    areas[2] = msg->data[2];
+  areas[0] = msg->data[0];
+  areas[1] = msg->data[1];
+  areas[2] = msg->data[2];
 
-    return;
+  return;
 }
 
 
@@ -107,135 +107,84 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     //Subscribers
-    ros::Subscriber action_getter = nh.subscribe("/desiredAction", 1, selectionCallback); //Action selection subscriber
-    ros::Subscriber color_getter = nh.subscribe("/desiredColor", 1, colorCallback); //AMCL pose subscriber
-    ros::Subscriber pose_getter = nh.subscribe("/amcl_pose", 1, poseCallback); //AMCL pose subscriber
-    ros::Subscriber area_subscriber = nh.subscribe("/rgb_areas", 1, areaCallback); //Color areas subscriber
-    ros::Publisher goalReached_publisher = nh.advertise<std_msgs::Bool>("/goal_reached", 1); //Publisher to tell if the robot is moving or not
-    MoveBaseClient ac("move_base", true); //Action client
+      ros::Subscriber action_getter = nh.subscribe("/desiredAction", 1, selectionCallback); //Action selection subscriber
+      ros::Subscriber color_getter = nh.subscribe("/desiredColor", 1, colorCallback); //AMCL pose subscriber
+      ros::Subscriber pose_getter = nh.subscribe("/amcl_pose", 1, poseCallback); //AMCL pose subscriber
+      ros::Subscriber area_subscriber = nh.subscribe("/rgb_areas", 1, areaCallback); //Color areas subscriber
+      ros::Publisher goalReached_publisher = nh.advertise<std_msgs::Bool>("/goal_reached", 1); //Publisher to tell if the robot is moving or not
+      MoveBaseClient ac("move_base", true); //Action client
 
     //Wait for the action server to come up
-    while(!ac.waitForServer(ros::Duration(5.0)))
-    {
-      ROS_INFO("Waiting for the move_base action server to come up");
-    }
+      while(!ac.waitForServer(ros::Duration(5.0)))
+      {
+        ROS_INFO("Waiting for the move_base action server to come up");
+      }
 
   //General goal configuration
-  move_base_msgs::MoveBaseGoal goal; //Mensaje a enviar
-  goal.target_pose.header.frame_id = "/map"; //Indicar que el sistema de referencia sera el del mapa
-  goal.target_pose.header.stamp = ros::Time::now();
+    move_base_msgs::MoveBaseGoal goal; //Mensaje a enviar
+    goal.target_pose.header.frame_id = "/map"; //Indicar que el sistema de referencia sera el del mapa
+    goal.target_pose.header.stamp = ros::Time::now();
 
   //Goals declarations
-  const float pose_home[3] = {22, 25, 1}; //Home (Outside the warehouse) //[0, 0, 0, 1]
-  const float pose_s[3] = {19.5, 16.5, 1}; //Go to the small objects
-  const float pose_m[3] = {19.5, 11.8, 1}; //Medium objects - 19.5; 11.8
-  const float pose_l[3] = {16.5, 11.5, 1}; //Large objs - 16.5; 11.5
-  const float pose_ws[3] = {14, 16, 1}; //Go to the small objects window //[0, 0, 1, 0]
-  const float pose_wm[3] = {15, 13, 1}; //Medium objects window
-  const float pose_wl[3] = {15, 10, 1}; //Large objs. w.
+    const float pose_home[3] = {22, 25, 1}; //Home (Outside the warehouse) //[0, 0, 0, 1]
+    const float pose_s[3] = {19.5, 16.5, 1}; //Go to the small objects
+    const float pose_m[3] = {19.5, 11.8, 1}; //Medium objects - 19.5; 11.8
+    const float pose_l[3] = {16.5, 11.5, 1}; //Large objs - 16.5; 11.5
+    const float pose_ws[3] = {14, 16, 1}; //Go to the small objects window //[0, 0, 1, 0]
+    const float pose_wm[3] = {15, 13, 1}; //Medium objects window
+    const float pose_wl[3] = {15, 10, 1}; //Large objs. w.
 
   //Create a vector with the poses (helps to access to them in a more elegant way)
-  const float poses[7][4] = {{22, 25, 0, 1}, {19.5, 16.5, 0, 1}, {19.5, 11.8, 0, 1}, {16.5, 11.5, 1, 0}, {14.5, 16, 1, 0}, {14.5, 13, 1, 0}, {14.5, 10, 1, 0}};
+    const float poses[7][4] = {{22, 25, 0, 1}, {19.5, 16.5, 0, 1}, {19.5, 11.8, 0, 1}, {16.5, 11.5, 1, 0}, {14.5, 16, 1, 0}, {14.5, 13, 1, 0}, {14.5, 10, 1, 0}};
 
   //Initialize areas vector
-  areas.push_back(0.0);
-  areas.push_back(0.0);
-  areas.push_back(0.0);
+    areas.push_back(0.0);
+    areas.push_back(0.0);
+    areas.push_back(0.0);
 
-  while (ros::ok())
-  {
-    //Indicar que no se ha procesado ni alcanzado el nuevo objetivo
-      goalReached.data = false;
-      goalReached_publisher.publish(goalReached); //Indicate the robot is bussy traveling
-/*
-      //Moverse al goal seleccionado
-      switch (selection)
-      {
-        case 0: //Warehouse entry
-          goal.target_pose.pose.position.x = pose_home[0];
-          goal.target_pose.pose.position.y = pose_home[1];
-          goal.target_pose.pose.orientation.z = 0;
-          goal.target_pose.pose.orientation.w = 1;
-        break;
-        case 1: //Small boxes
-          goal.target_pose.pose.position.x = pose_s[0];
-          goal.target_pose.pose.position.y = pose_s[1];
-          goal.target_pose.pose.orientation.z = 0;
-          goal.target_pose.pose.orientation.w = 1;
-        break;
-        case 2: //Medium boxes
-          goal.target_pose.pose.position.x = pose_m[0];
-          goal.target_pose.pose.position.y = pose_m[1];
-          goal.target_pose.pose.orientation.z = 0;
-          goal.target_pose.pose.orientation.w = 1;
-        break;
-        case 3: //Large boxes
-          goal.target_pose.pose.position.x = pose_l[0];
-          goal.target_pose.pose.position.y = pose_l[1];
-          goal.target_pose.pose.orientation.z = 1;
-          goal.target_pose.pose.orientation.w = 0;
-        break;
-        case 4: //Window 1
-          goal.target_pose.pose.position.x = pose_ws[0];
-          goal.target_pose.pose.position.y = pose_ws[1];
-          goal.target_pose.pose.orientation.z = 1;
-          goal.target_pose.pose.orientation.w = 0;
-        break;
-        case 5: //Window 2
-          goal.target_pose.pose.position.x = pose_wm[0];
-          goal.target_pose.pose.position.y = pose_wm[1];
-          goal.target_pose.pose.orientation.z = 1;
-          goal.target_pose.pose.orientation.w = 0;
-        break;
-        case 6: //Window 3
-          goal.target_pose.pose.position.x = pose_wl[0];
-          goal.target_pose.pose.position.y = pose_wl[1];
-          goal.target_pose.pose.orientation.z = 1;
-          goal.target_pose.pose.orientation.w = 0;
-        break;
-        case 7: //Scan areas
-          scanAreas();
-        break;
-        default:
+  //MAIN LOOP
+    while (ros::ok())
+    {
+      //Indicar que no se ha procesado ni alcanzado el nuevo objetivo
+        goalReached.data = false;
+        goalReached_publisher.publish(goalReached); //Indicate the robot is bussy traveling
+  
+      //Evaluate the selected action
+        if(selection>=0 and selection<7)
+        {
+          updateGoal(goal, poses, selection); //Update the goal
+  
+      	  if(selection == 3)
+      	    big_box_exception = true;
+      	  else
+      	    big_box_exception = false;
+        }	
+        else if (selection == 7)
+        {
+          scanAreas(); //Scan areas
+        }
+        else
+        {
           std::cout << "[!] ERROR: Opcion ilegal introducida. Opciones validas: '0', '1', '2', '3', '4', '5', '6' y '7'" << std::endl;
           return 0;
-        break;
-      }*/
-
-      //Evaluate the selected action
-      if(selection>=0 and selection<7)
-      {
-      	updateGoal(goal, poses, selection); //Update the goal
-      	if(selection == 3)
-      		big_box_exception = true;
-      	else
-      		big_box_exception = false;
-      }
-	
-      else if (selection == 7)
-		scanAreas(); //Scan areas
-      else
-      {
-		std::cout << "[!] ERROR: Opcion ilegal introducida. Opciones validas: '0', '1', '2', '3', '4', '5', '6' y '7'" << std::endl;
-        return 0;
-      }
-
-
-      ROS_INFO("[*] Enviando goal...");
-      ac.sendGoal(goal);
-      ac.waitForResult();
-
-      if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-        ROS_INFO("[*] Exito! Goal alcanzado");
-      else
-        ROS_INFO("[!] ERROR! No ha sido posible alcanzar el goal");
-
-      ros::spinOnce();
-
-      goalReached.data = true;
-      goalReached_publisher.publish(goalReached); //Indicate the robot has finished the job
-  }
-
+        }
+  
+  
+        ROS_INFO("[*] Enviando goal...");
+        ac.sendGoal(goal);
+        ac.waitForResult();
+  
+        if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+          ROS_INFO("[*] Exito! Goal alcanzado");
+        else
+          ROS_INFO("[!] ERROR! No ha sido posible alcanzar el goal");
+  
+        ros::spinOnce();
+  
+        goalReached.data = true;
+        goalReached_publisher.publish(goalReached); //Indicate the robot has finished the job
+    }
+  
   return 0;
 }
 
@@ -273,49 +222,48 @@ void scanAreas()
       goal.target_pose.pose.position.y = current_position[1];
   
   //Turn in sections of 0.02 rad (1º aprox.)
-  ROS_INFO("[*] Escaneando colores...");
-  if(big_box_exception)
-  {
-  	theta_multiplier = 3;
-  	increment_multiplier = -1;
-  }
-  else
-  {
-  	theta_multiplier = 1;
-  	increment_multiplier = 1;
-  }
-  for (theta=-increment_multiplier*3.142/2; theta<theta_multiplier*3.142/2; theta+=0.02) //Ir desde -90 a 90 grados
-  {
-
-    //Update the areas (attending the pending callbacks)
-	ros::spinOnce();
-
-    //Move the robot to the orientation in which the biggest area of the desired color was registered
-    goal.target_pose.pose.orientation = getQuatMsgFromTheta(theta);
-    ac.sendGoal(goal);
-    ac.waitForResult();
-
-    //Check if the actual area is bigger than the maximum perceived so far
-    if (max_area < areas[color])
+    ROS_INFO("[*] Escaneando colores...");
+    if(big_box_exception)
     {
-        max_area = areas[color];
-        theta_maxArea = theta; //Store actual orientation
+      theta_multiplier = 3;
+      increment_multiplier = -1;
     }
-  }
+    else
+    {
+      theta_multiplier = 1;
+      increment_multiplier = 1;
+    }
+    for (theta=-increment_multiplier*3.142/2; theta<theta_multiplier*3.142/2; theta+=0.02) //Ir desde -90 a 90 grados
+    {
+      //Update the areas (attending the pending callbacks
+        ros::spinOnce();
+  
+      //Move the robot to the orientation in which the biggest area of the desired color was registered
+        goal.target_pose.pose.orientation = getQuatMsgFromTheta(theta);
+        ac.sendGoal(goal);
+        ac.waitForResult();
+  
+      //Check if the actual area is bigger than the maximum perceived so far
+        if (max_area < areas[color])
+        {
+          max_area = areas[color];
+          theta_maxArea = theta; //Store actual orientation
+        }
+    }
 
   //Check if no area was detected
-  if (max_area == 0)
-  {
+    if (max_area == 0)
+    {
       error = 1;
       std::cout << "[!] ERROR: No se ha detectado ningun area del color buscado" << std::endl;
-  }
-  else //Rotate and "pick" the object
-  {
-    //Move the robot to the orientation in which the biggest area of the desired color was registered
-    goal.target_pose.pose.orientation = getQuatMsgFromTheta(theta_maxArea);
-    ac.sendGoal(goal);
-    ac.waitForResult();
-  }
+    }
+    else //Rotate and "pick" the object
+    {
+      //Move the robot to the orientation in which the biggest area of the desired color was registered
+        goal.target_pose.pose.orientation = getQuatMsgFromTheta(theta_maxArea);
+        ac.sendGoal(goal);
+        ac.waitForResult();
+    }
 
   return;
 }
