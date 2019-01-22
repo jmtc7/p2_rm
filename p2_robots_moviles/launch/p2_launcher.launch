@@ -1,5 +1,7 @@
 <launch>
 
+  <!-- LAUNCH SIMULATION AND VISUALIZATION LAUNCHFILES -->
+
   <!-- 3D Gazebo simulation -->
   <include file="$(find turtlebot_gazebo)/launch/turtlebot_world.launch">
     <arg name="world_file" value="$(find p2_robots_moviles)/launch/mapa_final_con_mesas"/>
@@ -15,5 +17,20 @@
 
   <!-- Navigation RViz viewer -->
   <include file="$(find turtlebot_rviz_launchers)/launch/view_navigation.launch"/>
+
+
+
+
+
+  <!-- RUN PACKAGE NODES -->
+
+  <!-- area_publisher -->
+  <node name="area_publisher" type="area_publisher" pkg="p2_robots_moviles"/>
+
+  <!-- goal_publisher -->
+  <node name="goal_publisher" type="goal_publisher" pkg="p2_robots_moviles"/>
+
+  <!-- main_process - Commented to allow to execute or stop independently (explained in documentation) -->
+  <!--node name=""goal_publisher" type="main_process" pkg="p2_robots_moviles"/-->
 
 </launch>
