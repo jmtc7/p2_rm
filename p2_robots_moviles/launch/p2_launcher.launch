@@ -1,12 +1,16 @@
 <launch>
 
   <!-- 3D Gazebo simulation -->
-  <include file="$(find p2_robots_moviles)/launch/gazebo.launch"/>
+  <include file="$(find turtlebot_gazebo)/launch/turtlebot_world.launch">
+    <arg name="world_file" value="$(find p2_robots_moviles)/launch/mapa_final_con_mesas"/>
+  </include>
 
   <!-- Navigation stack -->
-  <include file="$(find p2_robots_moviles)/launch/amcl.launch">
+  <include file="$(find turtlebot_gazebo)/launch/amcl_demo.launch">
+    <arg name="map_file" value="$(find p2_robots_moviles)/launch/map_pr2.yaml"/>
     <arg name="initial_pose_x" value="15.0"/>
     <arg name="initial_pose_y" value="15.0"/>
+    <arg name="initial_pose_a" value="4.71239"/>
   </include>
 
   <!-- Navigation RViz viewer -->
